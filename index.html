@@ -4,263 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Typing Test</title>
+
+  <!-- fonts: nunito for ui, special elite for that typewriter vibe -->
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Special+Elite&display=swap" rel="stylesheet">
-  <style>
-    * {
-      box-sizing: border-box;
-    }
 
-    body {
-      margin: 0;
-      font-family: 'Nunito', sans-serif;
-      background: linear-gradient(180deg, #f8f4ec, #efe7da);
-      color: #2d2d2d;
-      display: flex;
-      justify-content: center;
-      padding: 30px 15px;
-      min-height: 100vh;
-    }
-
-    .wrap {
-      width: 100%;
-      max-width: 760px;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: 2rem;
-    }
-
-    .top-text {
-      margin-top: 8px;
-      margin-bottom: 22px;
-      color: #6f6f6f;
-      font-size: 0.95rem;
-    }
-
-    .card {
-      background: white;
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-      border: 1px solid #eee4d6;
-    }
-
-    .row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 18px;
-    }
-
-    .mode-btn {
-      border: none;
-      padding: 8px 15px;
-      border-radius: 999px;
-      cursor: pointer;
-      background: #f2ede4;
-      color: #6b6255;
-      font-weight: 700;
-    }
-
-    .mode-btn.active {
-      background: #db7c3f;
-      color: white;
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin-bottom: 18px;
-    }
-
-    .stat {
-      background: #faf7f2;
-      border: 1px solid #eee5da;
-      border-radius: 12px;
-      padding: 12px 10px;
-      text-align: center;
-    }
-
-    .stat .num {
-      font-size: 1.5rem;
-      font-weight: 700;
-      font-family: 'Special Elite', monospace;
-    }
-
-    .stat .label {
-      font-size: 0.72rem;
-      color: #908778;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-top: 4px;
-    }
-
-    .bar {
-      width: 100%;
-      height: 7px;
-      background: #eee7dc;
-      border-radius: 999px;
-      overflow: hidden;
-      margin-bottom: 18px;
-    }
-
-    .bar-inner {
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, #db7c3f, #ef9b60);
-      transition: width 1s linear;
-    }
-
-    .text-box {
-      background: #fffaf3;
-      border: 1px dashed #e3d8c8;
-      border-radius: 12px;
-      padding: 18px;
-      min-height: 130px;
-      font-size: 1.2rem;
-      line-height: 2;
-      font-family: 'Special Elite', monospace;
-      color: #b6aa98;
-      cursor: text;
-      user-select: none;
-    }
-
-    .char.correct {
-      color: #2d2d2d;
-    }
-
-    .char.wrong {
-      color: #c0392b;
-      background: #ffe3df;
-      border-radius: 3px;
-    }
-
-    .char.current {
-      border-left: 2px solid #db7c3f;
-      animation: blink 1s steps(1) infinite;
-    }
-
-    @keyframes blink {
-      50% { border-color: transparent; }
-    }
-
-    .small-note {
-      text-align: center;
-      color: #9d9488;
-      font-size: 0.85rem;
-      margin: 14px 0 18px;
-    }
-
-    .controls {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    button.action {
-      border: none;
-      padding: 10px 18px;
-      border-radius: 10px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .primary {
-      background: #db7c3f;
-      color: white;
-    }
-
-    .secondary {
-      background: #ece7de;
-      color: #554d44;
-    }
-
-    #hiddenInput {
-      position: absolute;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .popup {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.32);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
-
-    .popup.show {
-      display: flex;
-    }
-
-    .popup-card {
-      background: white;
-      width: 100%;
-      max-width: 390px;
-      border-radius: 16px;
-      padding: 28px;
-      text-align: center;
-      box-shadow: 0 12px 35px rgba(0,0,0,0.18);
-    }
-
-    .popup-card h2 {
-      margin-top: 0;
-      color: #8e8478;
-      font-size: 1rem;
-    }
-
-    .big-score {
-      font-size: 4rem;
-      color: #db7c3f;
-      font-family: 'Special Elite', monospace;
-      margin: 10px 0 0;
-    }
-
-    .result-mini {
-      color: #8d8579;
-      margin-bottom: 20px;
-    }
-
-    .result-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 18px;
-    }
-
-    .mini {
-      background: #faf7f2;
-      border-radius: 10px;
-      padding: 12px;
-    }
-
-    .mini strong {
-      display: block;
-      font-size: 1.2rem;
-    }
-
-    .mini span {
-      font-size: 0.72rem;
-      color: #968d80;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    @media (max-width: 640px) {
-      .stats {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .text-box {
-        font-size: 1rem;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="wrap">
@@ -268,6 +16,7 @@
     <div class="top-text">A small project I made to test speed + accuracy.</div>
 
     <div class="card">
+      <!-- timer mode picker -->
       <div class="row">
         <button class="mode-btn" data-time="15">15 sec</button>
         <button class="mode-btn" data-time="30">30 sec</button>
@@ -275,6 +24,7 @@
         <button class="mode-btn" data-time="120">120 sec</button>
       </div>
 
+      <!-- live stats -->
       <div class="stats">
         <div class="stat">
           <div class="num" id="liveWpm">0</div>
@@ -299,6 +49,8 @@
       </div>
 
       <div class="text-box" id="quoteBox"></div>
+
+      <!-- hidden input so mobile keyboards still pop up -->
       <input id="hiddenInput" type="text" autocomplete="off" spellcheck="false">
 
       <div class="small-note" id="helperText">Click the text area and start typing. Backspace works too.</div>
@@ -310,13 +62,14 @@
     </div>
   </div>
 
+  <!-- result popup -->
   <div class="popup" id="resultPopup">
     <div class="popup-card">
       <h2>Finished</h2>
       <div class="big-score" id="finalWpm">0</div>
       <div class="result-mini">words per minute</div>
 
-      <div id="finalMessage" style="margin-bottom:18px;color:#6f675d;"></div>
+      <div id="finalMessage" class="final-msg"></div>
 
       <div class="result-grid">
         <div class="mini">
@@ -337,228 +90,10 @@
         </div>
       </div>
 
-      <button class="action primary" id="playAgain" style="width:100%;">Try Again</button>
+      <button class="action primary full-w" id="playAgain">Try Again</button>
     </div>
   </div>
 
-  <script>
-    // I used full sentences instead of random words because it feels less robotic
-    const SAMPLE_TEXTS = [
-      "Typing fast is cool, but typing accurately is what actually saves time in the long run.",
-      "Small projects are fun because you can experiment, break things, fix them, and learn while building.",
-      "Some days your fingers move like lightning, and other days the keyboard wins. That is normal.",
-      "Practice does not need to be dramatic. Ten focused minutes every day is already enough to improve.",
-      "I made this test to check typing speed, but also because building interactive stuff is oddly satisfying.",
-      "Clean design is nice, but a project also needs personality or it starts looking like template soup."
-    ];
-
-    const quoteBox = document.getElementById("quoteBox");
-    const hiddenInput = document.getElementById("hiddenInput");
-    const helperText = document.getElementById("helperText");
-    const timeBar = document.getElementById("timeBar");
-
-    const liveWpm = document.getElementById("liveWpm");
-    const liveAcc = document.getElementById("liveAcc");
-    const liveTime = document.getElementById("liveTime");
-    const liveMistakes = document.getElementById("liveMistakes");
-
-    const resultPopup = document.getElementById("resultPopup");
-    const finalWpm = document.getElementById("finalWpm");
-    const finalAcc = document.getElementById("finalAcc");
-    const finalMistakes = document.getElementById("finalMistakes");
-    const finalChars = document.getElementById("finalChars");
-    const finalDuration = document.getElementById("finalDuration");
-    const finalMessage = document.getElementById("finalMessage");
-
-    let currentText = "";
-    let currentIndex = 0;
-    let totalTyped = 0;
-    let mistakes = 0;
-    let hasStarted = false;
-    let finished = false;
-    let timer = null;
-    let selectedTime = 60;
-    let timeLeft = 60;
-
-    function pickText() {
-      const randomIndex = Math.floor(Math.random() * SAMPLE_TEXTS.length);
-      return SAMPLE_TEXTS[randomIndex];
-    }
-
-    function renderText(text) {
-      quoteBox.innerHTML = "";
-      currentText = text;
-      currentIndex = 0;
-      totalTyped = 0;
-      mistakes = 0;
-
-      for (let i = 0; i < text.length; i++) {
-        const span = document.createElement("span");
-        span.textContent = text[i];
-        span.classList.add("char");
-        if (i === 0) span.classList.add("current");
-        quoteBox.appendChild(span);
-      }
-
-      updateLiveStats();
-    }
-
-    function updateLiveStats() {
-      liveMistakes.textContent = mistakes;
-      liveTime.textContent = timeLeft;
-      liveAcc.textContent = totalTyped === 0 ? "--" : Math.max(0, Math.round(((totalTyped - mistakes) / totalTyped) * 100)) + "%";
-      liveWpm.textContent = calculateWpm();
-    }
-
-    function calculateWpm() {
-      const usedSeconds = selectedTime - timeLeft;
-      if (usedSeconds <= 0) return 0;
-      return Math.max(0, Math.round(((totalTyped - mistakes) / 5) / (usedSeconds / 60)));
-    }
-
-    function startGame() {
-      timer = setInterval(() => {
-        timeLeft--;
-        updateLiveStats();
-        timeBar.style.width = (timeLeft / selectedTime) * 100 + "%";
-
-        if (timeLeft <= 0) {
-          endGame();
-        }
-      }, 1000);
-    }
-
-    function endGame() {
-      clearInterval(timer);
-      finished = true;
-      hiddenInput.blur();
-
-      const speed = calculateWpm();
-      const accuracy = totalTyped === 0 ? "--" : Math.max(0, Math.round(((totalTyped - mistakes) / totalTyped) * 100)) + "%";
-
-      finalWpm.textContent = speed;
-      finalAcc.textContent = accuracy;
-      finalMistakes.textContent = mistakes;
-      finalChars.textContent = totalTyped;
-      finalDuration.textContent = selectedTime + "s";
-
-      let message = "";
-      if (speed >= 90) {
-        message = "That was ridiculously fast. Keyboard did not survive.";
-      } else if (speed >= 65) {
-        message = "Very strong result. Properly above average.";
-      } else if (speed >= 40) {
-        message = "Solid. You have decent speed already.";
-      } else {
-        message = "Not bad. More practice and this climbs quickly.";
-      }
-
-      finalMessage.textContent = message;
-      resultPopup.classList.add("show");
-    }
-
-    function resetGame(useNewText = false) {
-      clearInterval(timer);
-      hasStarted = false;
-      finished = false;
-      timeLeft = selectedTime;
-      hiddenInput.value = "";
-      helperText.textContent = "Click the text area and start typing. Backspace works too.";
-      resultPopup.classList.remove("show");
-      timeBar.style.transition = "none";
-      timeBar.style.width = "100%";
-
-      setTimeout(() => {
-        timeBar.style.transition = "width 1s linear";
-      }, 30);
-
-      renderText(useNewText ? pickText() : currentText || pickText());
-      updateLiveStats();
-    }
-
-    quoteBox.addEventListener("click", () => {
-      hiddenInput.focus();
-    });
-
-    document.addEventListener("keydown", (e) => {
-      if (finished && e.key === "Enter") {
-        resetGame(false);
-        return;
-      }
-
-      if (!hasStarted && e.key.length === 1) {
-        hiddenInput.focus();
-      }
-    });
-
-    hiddenInput.addEventListener("keydown", (e) => {
-      if (finished) return;
-
-      if (!hasStarted && e.key.length === 1) {
-        hasStarted = true;
-        helperText.textContent = "Game in progress...";
-        startGame();
-      }
-
-      if (e.key === "Backspace") {
-        e.preventDefault();
-
-        if (currentIndex > 0) {
-          const chars = quoteBox.querySelectorAll(".char");
-          chars[currentIndex].classList.remove("current");
-          currentIndex--;
-          chars[currentIndex].classList.remove("correct", "wrong");
-          chars[currentIndex].classList.add("current");
-        }
-
-        hiddenInput.value = "";
-      }
-    });
-
-    hiddenInput.addEventListener("input", () => {
-      if (!hasStarted || finished) return;
-
-      const typedChar = hiddenInput.value.slice(-1);
-      hiddenInput.value = "";
-
-      const chars = quoteBox.querySelectorAll(".char");
-      if (currentIndex >= chars.length) return;
-
-      chars[currentIndex].classList.remove("current");
-
-      if (typedChar === currentText[currentIndex]) {
-        chars[currentIndex].classList.add("correct");
-      } else {
-        chars[currentIndex].classList.add("wrong");
-        mistakes++;
-      }
-
-      totalTyped++;
-      currentIndex++;
-
-      if (currentIndex >= chars.length) {
-        renderText(pickText());
-      } else {
-        chars[currentIndex].classList.add("current");
-      }
-
-      updateLiveStats();
-    });
-
-    document.querySelectorAll(".mode-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        document.querySelectorAll(".mode-btn").forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        selectedTime = Number(btn.dataset.time);
-        resetGame(true);
-      });
-    });
-
-    document.getElementById("restart").addEventListener("click", () => resetGame(false));
-    document.getElementById("newText").addEventListener("click", () => resetGame(true));
-    document.getElementById("playAgain").addEventListener("click", () => resetGame(true));
-
-    resetGame(true);
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
