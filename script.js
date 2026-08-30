@@ -1,248 +1,284 @@
-// Typing Test - main logic
-// I wanted full sentences instead of random word lists because random words
-// feel weird and robotic to type. Sentences flow better.
-
-const SAMPLE_TEXTS = [
+const hackClubSentences = [
   "Typing fast is cool, but typing accurately is what actually saves time in the long run.",
   "Small projects are fun because you can experiment, break things, fix them, and learn while building.",
   "Some days your fingers move like lightning, and other days the keyboard wins. That is normal.",
   "Practice does not need to be dramatic. Ten focused minutes every day is already enough to improve.",
   "I made this test to check typing speed, but also because building interactive stuff is oddly satisfying.",
-  "Clean design is nice, but a project also needs personality or it starts looking like template soup."
+  "Clean design is nice, but a project also needs personality or it starts looking like template soup.",
+  "Hack Club is a community for students to learn to code and build cool projects together every day.",
+  "Stardance is the flagship event of Hack Club where students showcase their amazing projects and skills.",
+  "At Hack Club, we believe that building is the best way to learn new technologies and make friends.",
+  "Stardance brings together talented students who share their creative coding projects with everyone."
 ];
 
-// grabbing all the DOM refs once at the top so I don't repeat querySelector everywhere
-const quoteBox = document.getElementById("quoteBox");
-const hiddenInput = document.getElementById("hiddenInput");
-const helperText = document.getElementById("helperText");
-const timeBar = document.getElementById("timeBar");
+const sentenceDisplay = document.getElementById("sentenceDisplay");
+const userInput = document.getElementById("userInput");
+const statusMessage = document.getElementById("statusMessage");
+const timerFill = document.getElementById("timerFill");
 
-const liveWpm = document.getElementById("liveWpm");
-const liveAcc = document.getElementById("liveAcc");
-const liveTime = document.getElementById("liveTime");
-const liveMistakes = document.getElementById("liveMistakes");
+const wordsPerMinute = document.getElementById("wordsPerMinute");
+const percentAccuracy = document.getElementById("percentAccuracy");
+const secondsRemaining = document.getElementById("secondsRemaining");
+const mistakeCount = document.getElementById("mistakeCount");
 
-const resultPopup = document.getElementById("resultPopup");
-const finalWpm = document.getElementById("finalWpm");
-const finalAcc = document.getElementById("finalAcc");
+const resultsWindow = document.getElementById("resultsWindow");
+const displayedWPM = document.getElementById("displayedWPM");
+const finalAccuracy = document.getElementById("finalAccuracy");
 const finalMistakes = document.getElementById("finalMistakes");
-const finalChars = document.getElementById("finalChars");
-const finalDuration = document.getElementById("finalDuration");
-const finalMessage = document.getElementById("finalMessage");
+const charactersTyped = document.getElementById("charactersTyped");
+const testDuration = document.getElementById("testDuration");
+const feedbackText = document.getElementById("feedbackText");
 
-// state
-let currentText = "";
-let currentIndex = 0;
-let totalTyped = 0;
-let mistakes = 0;
-let hasStarted = false;
-let finished = false;
-let timer = null;
-let selectedTime = 60;
-let timeLeft = 60;
+let currentSentence = "";
+let currentCharacterIndex = 0;
+let totalCharactersTyped = 0;
+let totalMistakes = 0;
+let isGameRunning = false;
+let isGameComplete = false;
+let timerInterval = null;
+let selectedDuration = 60;
+let timeRemaining = 60;
 
-// pick a random sentence, avoid repeating the same one twice in a row if possible
-let lastPicked = -1;
-function pickText() {
-  let idx = Math.floor(Math.random() * SAMPLE_TEXTS.length);
-  if (SAMPLE_TEXTS.length > 1 && idx === lastPicked) {
-    idx = (idx + 1) % SAMPLE_TEXTS.length;
+let previousSentenceIndex = -1;
+
+function getRandomSentence() {
+  let randomIndex = Math.floor(Math.random() * hackClubSentences.length);
+  
+  if (hackClubSentences.length > 1 && randomIndex === previousSentenceIndex) {
+    randomIndex = (randomIndex + 1) % hackClubSentences.length;
   }
-  lastPicked = idx;
-  return SAMPLE_TEXTS[idx];
+  
+  previousSentenceIndex = randomIndex;
+  return hackClubSentences[randomIndex];
 }
 
-// builds the spans for each char so we can color them individually
-// NOTE: this used to reset totalTyped/mistakes which broke WPM across sentence changes,
-// fixed now (those reset only inside resetGame).
-function renderText(text) {
-  quoteBox.innerHTML = "";
-  currentText = text;
-  currentIndex = 0;
+function displaySentence(sentence) {
+  sentenceDisplay.innerHTML = "";
+  currentSentence = sentence;
+  currentCharacterIndex = 0;
 
-  for (let i = 0; i < text.length; i++) {
-    const span = document.createElement("span");
-    span.textContent = text[i];
-    span.classList.add("char");
-    if (i === 0) span.classList.add("current");
-    quoteBox.appendChild(span);
+  for (let i = 0; i < sentence.length; i++) {
+    const characterSpan = document.createElement("span");
+    characterSpan.textContent = sentence[i];
+    characterSpan.classList.add("character");
+    
+    if (i === 0) {
+      characterSpan.classList.add("active");
+    }
+    
+    sentenceDisplay.appendChild(characterSpan);
   }
 
-  updateLiveStats();
+  refreshStats();
 }
 
-function updateLiveStats() {
-  liveMistakes.textContent = mistakes;
-  liveTime.textContent = timeLeft;
-  liveAcc.textContent = totalTyped === 0
-    ? "--"
-    : Math.max(0, Math.round(((totalTyped - mistakes) / totalTyped) * 100)) + "%";
-  liveWpm.textContent = calculateWpm();
+function refreshStats() {
+  mistakeCount.textContent = totalMistakes;
+  secondsRemaining.textContent = timeRemaining;
+  
+  if (totalCharactersTyped === 0) {
+    percentAccuracy.textContent = "--";
+  } else {
+    const correctCharacters = totalCharactersTyped - totalMistakes;
+    const accuracyPercentage = Math.round((correctCharacters / totalCharactersTyped) * 100);
+    percentAccuracy.textContent = Math.max(0, accuracyPercentage) + "%";
+  }
+  
+  wordsPerMinute.textContent = calculateCurrentWPM();
 }
 
-// standard wpm calc: (correct chars / 5) / minutes
-function calculateWpm() {
-  const usedSeconds = selectedTime - timeLeft;
-  if (usedSeconds <= 0) return 0;
-  return Math.max(0, Math.round(((totalTyped - mistakes) / 5) / (usedSeconds / 60)));
+function calculateCurrentWPM() {
+  const secondsElapsed = selectedDuration - timeRemaining;
+  
+  if (secondsElapsed <= 0) {
+    return 0;
+  }
+  
+  const correctCharacters = totalCharactersTyped - totalMistakes;
+  const words = correctCharacters / 5;
+  const minutes = secondsElapsed / 60;
+  const calculatedWPM = words / minutes;
+  
+  return Math.max(0, Math.round(calculatedWPM));
 }
 
-function startGame() {
-  timer = setInterval(() => {
-    timeLeft--;
-    updateLiveStats();
-    timeBar.style.width = (timeLeft / selectedTime) * 100 + "%";
+function startCountdown() {
+  timerInterval = setInterval(() => {
+    timeRemaining--;
+    refreshStats();
+    
+    const percentageFull = (timeRemaining / selectedDuration) * 100;
+    timerFill.style.width = percentageFull + "%";
 
-    if (timeLeft <= 0) {
-      endGame();
+    if (timeRemaining <= 0) {
+      completeGame();
     }
   }, 1000);
 }
 
-function endGame() {
-  clearInterval(timer);
-  finished = true;
-  hiddenInput.blur();
+function completeGame() {
+  clearInterval(timerInterval);
+  isGameComplete = true;
+  userInput.blur();
 
-  const speed = calculateWpm();
-  const accuracy = totalTyped === 0
-    ? "--"
-    : Math.max(0, Math.round(((totalTyped - mistakes) / totalTyped) * 100)) + "%";
-
-  finalWpm.textContent = speed;
-  finalAcc.textContent = accuracy;
-  finalMistakes.textContent = mistakes;
-  finalChars.textContent = totalTyped;
-  finalDuration.textContent = selectedTime + "s";
-
-  // little personality on the result screen
-  let message;
-  if (speed >= 90) {
-    message = "That was ridiculously fast. Keyboard did not survive.";
-  } else if (speed >= 65) {
-    message = "Very strong result. Properly above average.";
-  } else if (speed >= 40) {
-    message = "Solid. You have decent speed already.";
-  } else {
-    message = "Not bad. More practice and this climbs quickly.";
+  const finalWPM = calculateCurrentWPM();
+  const correctCharacters = totalCharactersTyped - totalMistakes;
+  
+  let displayAccuracy = "--";
+  if (totalCharactersTyped > 0) {
+    displayAccuracy = Math.max(0, Math.round((correctCharacters / totalCharactersTyped) * 100)) + "%";
   }
 
-  finalMessage.textContent = message;
-  resultPopup.classList.add("show");
+  displayedWPM.textContent = finalWPM;
+  finalAccuracy.textContent = displayAccuracy;
+  finalMistakes.textContent = totalMistakes;
+  charactersTyped.textContent = totalCharactersTyped;
+  testDuration.textContent = selectedDuration + "s";
+
+  if (finalWPM >= 90) {
+    feedbackText.textContent = "Excellent! That was incredibly fast! You are a typing master.";
+  } else if (finalWPM >= 65) {
+    feedbackText.textContent = "Great job! You are well above average. Keep up the good work!";
+  } else if (finalWPM >= 40) {
+    feedbackText.textContent = "Good effort! You are improving. Practice more to reach higher speeds.";
+  } else {
+    feedbackText.textContent = "Keep practicing! With regular practice, you will get much faster.";
+  }
+
+  resultsWindow.classList.add("show");
 }
 
-function resetGame(useNewText = false) {
-  clearInterval(timer);
-  hasStarted = false;
-  finished = false;
-  timeLeft = selectedTime;
-  totalTyped = 0;
-  mistakes = 0;
-  hiddenInput.value = "";
-  helperText.textContent = "Click the text area and start typing. Backspace works too.";
-  resultPopup.classList.remove("show");
+function restartGameSession(shouldLoadNewSentence = false) {
+  clearInterval(timerInterval);
+  isGameRunning = false;
+  isGameComplete = false;
+  timeRemaining = selectedDuration;
+  totalCharactersTyped = 0;
+  totalMistakes = 0;
+  userInput.value = "";
+  statusMessage.textContent = "Click the text and start typing to begin. Press backspace to fix mistakes.";
+  resultsWindow.classList.remove("show");
 
-  // snap the bar back to full without animating
-  timeBar.style.transition = "none";
-  timeBar.style.width = "100%";
+  timerFill.style.transition = "none";
+  timerFill.style.width = "100%";
+  
   setTimeout(() => {
-    timeBar.style.transition = "width 1s linear";
-  }, 30);
+    timerFill.style.transition = "width 1s linear";
+  }, 50);
 
-  renderText(useNewText ? pickText() : (currentText || pickText()));
-  updateLiveStats();
+  if (shouldLoadNewSentence) {
+    displaySentence(getRandomSentence());
+  } else {
+    if (currentSentence) {
+      displaySentence(currentSentence);
+    } else {
+      displaySentence(getRandomSentence());
+    }
+  }
+  
+  refreshStats();
 }
 
-// click the text area => focus hidden input
-quoteBox.addEventListener("click", () => {
-  hiddenInput.focus();
+sentenceDisplay.addEventListener("click", () => {
+  userInput.focus();
 });
 
-// global key handler for "press enter to restart after finish" + auto-focus
-document.addEventListener("keydown", (e) => {
-  if (finished && e.key === "Enter") {
-    resetGame(false);
+document.addEventListener("keydown", (event) => {
+  if (isGameComplete && event.key === "Enter") {
+    restartGameSession(false);
     return;
   }
-  if (!hasStarted && e.key.length === 1) {
-    hiddenInput.focus();
+  
+  if (!isGameRunning && event.key.length === 1) {
+    userInput.focus();
   }
 });
 
-// backspace handling on the hidden input
-hiddenInput.addEventListener("keydown", (e) => {
-  if (finished) return;
-
-  if (!hasStarted && e.key.length === 1) {
-    hasStarted = true;
-    helperText.textContent = "Game in progress...";
-    startGame();
+userInput.addEventListener("keydown", (event) => {
+  if (isGameComplete) {
+    return;
   }
 
-  if (e.key === "Backspace") {
-    e.preventDefault();
-    if (currentIndex > 0) {
-      const chars = quoteBox.querySelectorAll(".char");
-      chars[currentIndex].classList.remove("current");
-      currentIndex--;
-      chars[currentIndex].classList.remove("correct", "wrong");
-      chars[currentIndex].classList.add("current");
+  if (!isGameRunning && event.key.length === 1) {
+    isGameRunning = true;
+    statusMessage.textContent = "Game is running! Keep typing...";
+    startCountdown();
+  }
+
+  if (event.key === "Backspace") {
+    event.preventDefault();
+    
+    if (currentCharacterIndex > 0) {
+      const allCharacters = sentenceDisplay.querySelectorAll(".character");
+      allCharacters[currentCharacterIndex].classList.remove("active");
+      currentCharacterIndex--;
+      allCharacters[currentCharacterIndex].classList.remove("correct", "incorrect");
+      allCharacters[currentCharacterIndex].classList.add("active");
     }
-    hiddenInput.value = "";
+    
+    userInput.value = "";
   }
 });
 
-// main typing handler
-hiddenInput.addEventListener("input", () => {
-  if (!hasStarted || finished) return;
-
-  const typedChar = hiddenInput.value.slice(-1);
-  hiddenInput.value = "";
-
-  const chars = quoteBox.querySelectorAll(".char");
-  if (currentIndex >= chars.length) return;
-
-  chars[currentIndex].classList.remove("current");
-
-  if (typedChar === currentText[currentIndex]) {
-    chars[currentIndex].classList.add("correct");
-  } else {
-    chars[currentIndex].classList.add("wrong");
-    mistakes++;
+userInput.addEventListener("input", () => {
+  if (!isGameRunning || isGameComplete) {
+    return;
   }
 
-  totalTyped++;
-  currentIndex++;
+  const typedCharacter = userInput.value.slice(-1);
+  userInput.value = "";
 
-  // loaded a new sentence when current one is done — keep stats rolling
-  if (currentIndex >= chars.length) {
-    renderText(pickText());
-  } else {
-    chars[currentIndex].classList.add("current");
+  const allCharacters = sentenceDisplay.querySelectorAll(".character");
+  
+  if (currentCharacterIndex >= allCharacters.length) {
+    return;
   }
 
-  updateLiveStats();
+  allCharacters[currentCharacterIndex].classList.remove("active");
+
+  const expectedCharacter = currentSentence[currentCharacterIndex];
+  
+  if (typedCharacter === expectedCharacter) {
+    allCharacters[currentCharacterIndex].classList.add("correct");
+  } else {
+    allCharacters[currentCharacterIndex].classList.add("incorrect");
+    totalMistakes++;
+  }
+
+  totalCharactersTyped++;
+  currentCharacterIndex++;
+
+  if (currentCharacterIndex >= allCharacters.length) {
+    displaySentence(getRandomSentence());
+  } else {
+    allCharacters[currentCharacterIndex].classList.add("active");
+  }
+
+  refreshStats();
 });
 
-// mode buttons (15/30/60/120)
-document.querySelectorAll(".mode-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".mode-btn").forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    selectedTime = Number(btn.dataset.time);
-    resetGame(true);
+document.querySelectorAll(".duration-button").forEach(button => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll(".duration-button").forEach(btn => {
+      btn.classList.remove("active");
+    });
+    
+    button.classList.add("active");
+    selectedDuration = Number(button.dataset.seconds);
+    restartGameSession(true);
   });
 });
 
-// control buttons
-document.getElementById("restart").addEventListener("click", () => resetGame(false));
-document.getElementById("newText").addEventListener("click", () => resetGame(true));
-document.getElementById("playAgain").addEventListener("click", () => resetGame(true));
+document.getElementById("restartButton").addEventListener("click", () => {
+  restartGameSession(false);
+});
 
-// kick things off
-resetGame(true);
+document.getElementById("newTextButton").addEventListener("click", () => {
+  restartGameSession(true);
+});
 
-// TODO (future ideas):
-//  - save best WPM to localStorage
-//  - hard mode: punctuation + numbers
-//  - dark theme toggle
+document.getElementById("playAgainButton").addEventListener("click", () => {
+  restartGameSession(true);
+});
+
+restartGameSession(true);
