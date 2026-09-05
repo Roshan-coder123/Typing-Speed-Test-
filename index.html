@@ -3,87 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Typing Test</title>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&family=Special+Elite&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <title>Starlight Type Lab</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: "Trebuchet MS", sans-serif;
+      background: #08111f;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      min-height: 100vh;
+      overflow: hidden;
+      background: #08111f;
+    }
+    
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      cursor: text;
+    }
+  </style>
 </head>
 <body>
-  <div class="main-container">
-    <h1>Typing Speed Test</h1>
-    <p class="description">Check your typing speed and accuracy with Hack Club sentences</p>
-
-    <div class="game-container">
-      <div class="duration-options">
-        <button class="duration-button" data-seconds="15">15 seconds</button>
-        <button class="duration-button" data-seconds="30">30 seconds</button>
-        <button class="duration-button active" data-seconds="60">60 seconds</button>
-        <button class="duration-button" data-seconds="120">120 seconds</button>
-      </div>
-
-      <div class="stats-area">
-        <div class="stat-box">
-          <div class="stat-number" id="wordsPerMinute">0</div>
-          <div class="stat-label">WPM</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-number" id="percentAccuracy">--</div>
-          <div class="stat-label">Accuracy</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-number" id="secondsRemaining">60</div>
-          <div class="stat-label">Time Left</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-number" id="mistakeCount">0</div>
-          <div class="stat-label">Mistakes</div>
-        </div>
-      </div>
-
-      <div class="timer-bar">
-        <div class="timer-progress" id="timerFill"></div>
-      </div>
-
-      <div class="text-container" id="sentenceDisplay"></div>
-
-      <input id="userInput" type="text" autocomplete="off" spellcheck="false">
-
-      <div class="helper-text" id="statusMessage">Click the text and start typing to begin. Press backspace to fix mistakes.</div>
-
-      <div class="action-buttons">
-        <button class="action-button restart-button" id="restartButton">Restart</button>
-        <button class="action-button next-button" id="newTextButton">Load New Text</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="results-overlay" id="resultsWindow">
-    <div class="results-content">
-      <h2>Typing Test Finished!</h2>
-      <div class="your-score" id="displayedWPM">0</div>
-      <p class="score-unit">words per minute</p>
-
-      <p class="performance-message" id="feedbackText"></p>
-
-      <div class="results-breakdown">
-        <div class="result-detail">
-          <strong id="finalAccuracy">--</strong>
-          <span>Accuracy</span>
-        </div>
-        <div class="result-detail">
-          <strong id="finalMistakes">0</strong>
-          <span>Mistakes</span>
-        </div>
-        <div class="result-detail">
-          <strong id="charactersTyped">0</strong>
-          <span>Characters Typed</span>
-        </div>
-        <div class="result-detail">
-          <strong id="testDuration">60s</strong>
-          <span>Test Length</span>
-        </div>
-      </div>
-
-      <button class="action-button restart-button full-width" id="playAgainButton">Play Again</button>
+  <canvas id="typeLab" aria-label="Starlight Type Lab typing game"></canvas>
   <script src="script.js"></script>
 </body>
 </html>
